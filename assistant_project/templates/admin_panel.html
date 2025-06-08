@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Pannello Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Imposta lo sfondo scuro e il testo in verde fluorescente */
+    body {
+      background: #111;
+      color: #39FF14; /* verde fluorescente */
+      font-family: 'Orbitron', sans-serif;
+      padding: 20px;
+    }
+    /* Le card hanno un background leggermente più chiaro per contrasto */
+    .card {
+      background: #222;
+      margin-bottom: 20px;
+    }
+    /* I link usano il verde fluorescente */
+    a {
+      color: #39FF14;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Pannello Admin</h2>
+    <div class="row">
+      <!-- Opzione Gestione Utenti -->
+      <div class="col-md-6">
+        <div class="card p-3">
+          <h4>Gestione Utenti</h4>
+          <p>Visualizza le chat e gli eventi di ciascun utente</p>
+          <a class="btn btn-primary" href="{{ url_for('admin_users') }}">Visualizza Utenti</a>
+        </div>
+      </div>
+      <!-- Opzione Rapportini -->
+      <div class="col-md-6">
+        <div class="card p-3">
+          <h4>Rapportini di Lavoro</h4>
+          <p>Visualizza tutti i rapportini caricati</p>
+          <a class="btn btn-primary" href="{{ url_for('admin_reports') }}">Visualizza Rapportini</a>
+        </div>
+      </div>
+    </div>
+    <a class="btn btn-secondary mt-3" href="{{ url_for('index') }}">Torna alla Dashboard</a>
+  </div>
+</body>
+</html>

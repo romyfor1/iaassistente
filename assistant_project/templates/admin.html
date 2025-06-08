@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel - Assistente IA</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Puoi sovrascrivere qui le regole di custom.css oppure aggiungerle lì -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+  <style>
+    /* Regole personalizzate per rendere il testo grigio chiaro */
+    body {
+      background-color: #222; /* sfondo scuro */
+      color: #d3d3d3; /* testo grigio chiaro */
+    }
+    /* Per garantire che anche il testo all'interno dei componenti Bootstrap appaia grigio chiaro */
+    h2, h4, p, li, a, .navbar-brand, .nav-link {
+      color: #d3d3d3 !important;
+    }
+    /* Se vuoi modificare il colore dei link specificamente nel list-group */
+    .list-group-item,
+    .list-group-item a {
+      color: #d3d3d3;
+    }
+    /* Se serve un contrasto maggiore, puoi modificare lo sfondo dei link attivi */
+    .list-group-item.active {
+      background-color: #444;
+      border-color: #444;
+    }
+  </style>
+</head>
+<body class="bg-gradient-custom">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
+    <div class="container">
+      <a class="navbar-brand" href="#">Admin Panel</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar" 
+              aria-controls="adminNavbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="adminNavbar">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('index') }}">Torna alla Chat</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="container my-4">
+    <h2 class="text-center mb-4">Pannello Amministratore</h2>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="list-group shadow">
+          <a href="#" class="list-group-item list-group-item-action active">Utenti</a>
+          {% for u in users %}
+            <a href="{{ url_for('admin_view_chat', username=u[0]) }}" class="list-group-item list-group-item-action">
+              {{ u[1] }} ({{ u[0] }})
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="col-md-8">
+        {% if selected_user %}
+          <h4 class="mb-4">Chat di {{ selected_user }}</h4>
+          <div class="card shadow">
+            <div class="card-body">
+              {% for c in conversations %}
+                <div class="mb-3">
+                  <small class="text-muted">{{ c[0] }}</small><br>
+                  <p class="mb-1">
+                    <strong class="{% if c[1]=='Il tuo assistente IA' %}text-ia{% else %}text-user{% endif %}">
+                      {{ c[1] }}:
+                    </strong>
+                    {{ c[2] }}
+                  </p>
+                  <p class="mb-0"><em>{{ c[3] }}</em></p>
+                  {% if c[4] %}
+                    <p class="mb-0">[Evento: {{ c[4] }}]</p>
+                  {% endif %}
+                  {% if c[5] %}
+                    <p class="mb-0">[Tag: {{ c[5] }}]</p>
+                  {% endif %}
+                  <hr>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% else %}
+          <p>Seleziona un utente dalla lista a sinistra per visualizzare le chat.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

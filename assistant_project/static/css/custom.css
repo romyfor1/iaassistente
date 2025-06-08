@@ -1,0 +1,51 @@
+/* Esempio di tema colorato e moderno */
+body.bg-gradient-custom {
+  background: linear-gradient(135deg, #74ABE2, #5563DE);
+  min-height: 100vh;
+}
+
+.card {
+  border-radius: 15px;
+}
+
+.chat-box {
+  height: 400px;
+  overflow-y: scroll;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  padding: 15px;
+}
+
+.navbar, .card-header {
+  border-radius: 15px 15px 0 0;
+}
+
+a.link-light {
+  color: #ffc107;
+  text-decoration: underline;
+}
+
+a.link-light:hover {
+  color: #ffdb4d;
+}
+
+.btn-primary {
+  background-color: #5563DE;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #4450c4;
+}
+
+/* Stili aggiuntivi per i messaggi */
+.text-primary {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.text-success {
+  font-size: 0.95rem;
+  font-style: italic;
+}

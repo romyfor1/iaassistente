@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Pannello Admin - Rapportini e Conversazioni</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Google Font: Orbitron -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #111;
+      color: #00ffff;
+      font-family: 'Orbitron', sans-serif;
+    }
+    a { color: #00ffff; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .list-group-item { background: #222; }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <h2 class="mb-4">Pannello Admin - Rapportini e Conversazioni</h2>
+
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" type="button" role="tab" aria-controls="reports" aria-selected="true">
+          Rapportini
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="chats-tab" data-bs-toggle="tab" data-bs-target="#chats" type="button" role="tab" aria-controls="chats" aria-selected="false">
+          Conversazioni
+        </button>
+      </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="adminTabsContent">
+      <!-- Tab Rapportini -->
+      <div class="tab-pane fade show active pt-3" id="reports" role="tabpanel" aria-labelledby="reports-tab">
+        <ul class="list-group">
+          {% for report in reports %}
+            <li class="list-group-item">
+              <a href="{{ url_for('get_report', filename=report) }}" target="_blank">{{ report }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      
+      <!-- Tab Conversazioni -->
+      <div class="tab-pane fade pt-3" id="chats" role="tabpanel" aria-labelledby="chats-tab">
+        {% if chats %}
+          <ul class="list-group mb-3">
+            {% for chat in chats %}
+              <li class="list-group-item">
+                <strong>{{ chat[0] }}</strong> - {{ chat[1] }}<br>
+                <span>[Utente] {{ chat[2] }}</span> | <span>[Assistente] {{ chat[3] }}</span>
+                {% if chat[4] %}<br><small>(Evento: {{ chat[4] }})</small>{% endif %}
+                {% if chat[5] %}<br><small>(Tag: {{ chat[5] }})</small>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>Nessuna conversazione registrata.</p>
+        {% endif %}
+      </div>
+    </div>
+    
+    <a class="btn btn-secondary mt-3" href="{{ url_for('admin_panel') }}">Torna al Pannello Admin</a>
+  </div>
+
+  <!-- Bootstrap Bundle JS (include Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

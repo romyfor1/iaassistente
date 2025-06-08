@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Il tuo assistente IA – Dashboard Futuristica</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap CSS & Google Font Orbitron -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Model Viewer -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    body, h1, h2, h3, .navbar-brand {
+      font-family: 'Orbitron', sans-serif;
+    }
+    body {
+      background: linear-gradient(45deg, #0f0c29, #302b63, #24243e);
+      background-size: 400% 400%;
+      animation: gradient-bg 15s ease infinite;
+      margin: 0;
+      color: #e0e0e0;
+    }
+    @keyframes gradient-bg {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    /* Navbar futuristica */
+    .navbar {
+      background: rgba(0,0,0,0.75);
+      box-shadow: 0 0 15px rgba(0,255,255,0.2);
+    }
+    .navbar .hamburger {
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: #00ffff;
+      margin-right: 15px;
+    }
+    /* Pannello laterale off-canvas */
+    #sidePanel {
+      position: fixed;
+      top: 0;
+      left: -300px;
+      width: 300px;
+      height: 100%;
+      background: #111;
+      color: #00ffff;
+      transition: left 0.3s ease;
+      padding: 20px;
+      z-index: 1050;
+    }
+    #sidePanel h4 {
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    #sidePanel a {
+      color: #00ffff;
+      text-decoration: none;
+      display: block;
+      margin: 10px 0;
+    }
+    #sidePanel .close-btn {
+      cursor: pointer;
+      font-size: 1.2rem;
+      position: absolute;
+      top: 10px;
+      right: 15px;
+    }
+    /* Effetti neon per i messaggi */
+    .text-user {
+      color: #8a2be2;
+      text-shadow: 0 0 6px #8a2be2, 0 0 10px #8a2be2;
+      font-weight: bold;
+    }
+    .text-ia {
+      color: #00ffff;
+      text-shadow: 0 0 6px #00ffff, 0 0 10px #00ffff;
+      font-weight: bold;
+    }
+    h2.text-center {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px rgba(0,255,255,0.6);
+    }
+    .container {
+      padding-top: 30px;
+      padding-bottom: 30px;
+    }
+    /* Sezione del modello 3D */
+    .robot-container {
+      max-width: 430px;
+      margin: 0 auto 20px auto;
+      text-align: center;
+    }
+    .robot-title {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #00ffff;
+      text-shadow: 0 0 8px rgba(0,255,255,0.6);
+    }
+    model-viewer {
+      width: 100%;
+      height: 230px;
+      background: transparent;
+      filter: drop-shadow(0px 0px 8px rgba(0,255,255,0.7));
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+    .pulse {
+      animation: pulse 0.5s ease-in-out;
+    }
+    /* Chat box styling */
+    .chat-box {
+      max-height: 400px;
+      overflow-y: auto;
+      background: rgba(20,20,20,0.8);
+      border: 1px solid rgba(0,255,255,0.2);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    .chat-message {
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Pannello laterale off-canvas -->
+  <div id="sidePanel">
+    <span class="close-btn" onclick="toggleSidePanel()">×</span>
+    <h4>Opzioni</h4>
+    <a href="#" onclick="openCreateReminder()">CREA PROMEMORIA</a>
+    <a href="#" onclick="openCreateReport()">INSERISCI RAPPORTINO</a>
+  </div>
+  
+  <!-- Navbar con hamburger -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <span class="hamburger" onclick="toggleSidePanel()">☰</span>
+      <a class="navbar-brand" href="{{ url_for('index') }}">Il tuo assistente IA</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+              data-bs-target="#navbarNav" aria-controls="navbarNav"
+              aria-expanded="false" aria-label="Toggle navigation">
+         <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+         <ul class="navbar-nav ms-auto">
+           {% if user %}
+              <li class="nav-item">
+                <a class="nav-link" href="#">Benvenuto, {{ user.fullname }}</a>
+              </li>
+              {% if is_admin %}
+                <!-- Quando clicca sul tab, viene reindirizzato a admin.html -->
+                <li class="nav-item">
+                  {% if is_admin %}
+  <a class="nav-link" href="{{ url_for('admin_panel') }}">Pannello Admin</a>
+{% endif %}
+                </li>
+              {% endif %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+              </li>
+           {% else %}
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+              </li>
+           {% endif %}
+         </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Il tuo assistente IA – Dashboard Futuristica</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap CSS & Google Font Orbitron -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Model Viewer -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    body, h1, h2, h3, .navbar-brand {
+      font-family: 'Orbitron', sans-serif;
+    }
+    body {
+      background: linear-gradient(45deg, #0f0c29, #302b63, #24243e);
+      background-size: 400% 400%;
+      animation: gradient-bg 15s ease infinite;
+      margin: 0;
+      color: #e0e0e0;
+    }
+    @keyframes gradient-bg {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    /* Navbar futuristica */
+    .navbar {
+      background: rgba(0,0,0,0.75);
+      box-shadow: 0 0 15px rgba(0,255,255,0.2);
+    }
+    .navbar .hamburger {
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: #00ffff;
+      margin-right: 15px;
+    }
+    /* Pannello laterale off-canvas */
+    #sidePanel {
+      position: fixed;
+      top: 0;
+      left: -300px;
+      width: 300px;
+      height: 100%;
+      background: #111;
+      color: #00ffff;
+      transition: left 0.3s ease;
+      padding: 20px;
+      z-index: 1050;
+    }
+    #sidePanel h4 {
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    #sidePanel a {
+      color: #00ffff;
+      text-decoration: none;
+      display: block;
+      margin: 10px 0;
+    }
+    #sidePanel .close-btn {
+      cursor: pointer;
+      font-size: 1.2rem;
+      position: absolute;
+      top: 10px;
+      right: 15px;
+    }
+    /* Effetti neon per i messaggi */
+    .text-user {
+      color: #8a2be2;
+      text-shadow: 0 0 6px #8a2be2, 0 0 10px #8a2be2;
+      font-weight: bold;
+    }
+    .text-ia {
+      color: #00ffff;
+      text-shadow: 0 0 6px #00ffff, 0 0 10px #00ffff;
+      font-weight: bold;
+    }
+    h2.text-center {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px rgba(0,255,255,0.6);
+    }
+    .container {
+      padding-top: 30px;
+      padding-bottom: 30px;
+    }
+    /* Sezione del modello 3D */
+    .robot-container {
+      max-width: 430px;
+      margin: 0 auto 20px auto;
+      text-align: center;
+    }
+    .robot-title {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #00ffff;
+      text-shadow: 0 0 8px rgba(0,255,255,0.6);
+    }
+    model-viewer {
+      width: 100%;
+      height: 230px;
+      background: transparent;
+      filter: drop-shadow(0px 0px 8px rgba(0,255,255,0.7));
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+    .pulse {
+      animation: pulse 0.5s ease-in-out;
+    }
+    /* Chat box styling */
+    .chat-box {
+      max-height: 400px;
+      overflow-y: auto;
+      background: rgba(20,20,20,0.8);
+      border: 1px solid rgba(0,255,255,0.2);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    .chat-message {
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Pannello laterale off-canvas -->
+  <div id="sidePanel">
+    <span class="close-btn" onclick="toggleSidePanel()">×</span>
+    <h4>Opzioni</h4>
+    <a href="#" onclick="openCreateReminder()">CREA PROMEMORIA</a>
+    <a href="#" onclick="openCreateReport()">INSERISCI RAPPORTINO</a>
+  </div>
+  
+  <!-- Navbar con hamburger -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <span class="hamburger" onclick="toggleSidePanel()">☰</span>
+      <a class="navbar-brand" href="{{ url_for('index') }}">Il tuo assistente IA</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+              data-bs-target="#navbarNav" aria-controls="navbarNav"
+              aria-expanded="false" aria-label="Toggle navigation">
+         <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+         <ul class="navbar-nav ms-auto">
+           {% if user %}
+             <li class="nav-item">
+               <a class="nav-link" href="#">Benvenuto, {{ user.fullname }}</a>
+             </li>
+             {% if is_admin %}
+               <li class="nav-item">
+                 <a class="nav-link" href="{{ url_for('admin_panel') }}">Pannello Admin</a>
+               </li>
+             {% endif %}
+             <li class="nav-item">
+               <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+             </li>
+           {% else %}
+             <li class="nav-item">
+               <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+             </li>
+           {% endif %}
+         </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="container my-4">
+    <!-- Visualizza promemoria per oggi -->
+    {% if reminders|length > 0 %}
+      <div class="alert alert-info">
+        <strong>Promemoria Oggi:</strong>
+        <ul>
+          {% for rem in reminders %}
+            <li>{{ rem.text }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+    
+    <h2 class="text-center mb-4">Area Chat</h2>
+    
+    <!-- Sezione del modello 3D -->
+    <div class="robot-container">
+      <div class="robot-title">Il tuo assistente IA</div>
+      <model-viewer id="robotModelViewer" src="{{ url_for('static', filename='models/tour_ia.gltf') }}"
+                    alt="Il tuo Assistente IA" autoplay animation-loop style="background: transparent;">
+      </model-viewer>
+    </div>
+    
+    <!-- Cronologia Chat personale -->
+    <div class="card shadow mb-4">
+      <div class="card-header bg-secondary">Cronologia Chat</div>
+      <div class="card-body chat-box">
+        {% for conv in conversazioni | reverse %}
+          <div class="mb-3 p-2 border-bottom">
+            <small class="text-muted">{{ conv[0] }}</small><br>
+            <p class="mb-1">
+              <strong class="{% if conv[1]=='Il tuo assistente IA' %}text-ia{% else %}text-user{% endif %}">
+                {{ conv[1] }}:
+              </strong>
+              {{ conv[2] }}
+            </p>
+            <p class="mb-0 text-success"><em>{{ conv[3] }}</em></p>
+            {% if conv[4] %}
+              <p class="mb-0 text-info">[Evento: {{ conv[4] }}]</p>
+            {% endif %}
+            {% if conv[5] %}
+              <p class="mb-0 text-warning">[Tag: {{ conv[5] }}]</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    
+    <!-- Form per inviare messaggi con campo di testo e due pulsanti: Invia e Parla -->
+    <div class="mb-4">
+      <form action="{{ url_for('send') }}" method="post">
+        <div class="input-group">
+          <input type="text" id="messageInput" name="message" class="form-control form-control-lg" placeholder="Scrivi un messaggio qui..." required>
+          <button type="submit" class="btn btn-primary btn-lg">Invia</button>
+          <!-- Pulsante per attivare l'input vocale -->
+          <button type="button" class="btn btn-warning btn-lg" onclick="attivaVoce()">Parla</button>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Form per caricare foto/rapportino -->
+    <div class="mb-4">
+      <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+        <div class="input-group">
+          <input type="file" name="photo" class="form-control" required>
+          <button type="submit" class="btn btn-success btn-lg">Carica Foto</button>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Modal per creare Promemoria -->
+    <div id="reminderModal" class="modal" tabindex="-1" style="display: none;">
+      <div class="modal-dialog">
+        <div class="modal-content bg-dark text-light">
+          <div class="modal-header">
+            <h5 class="modal-title">Crea Promemoria</h5>
+            <button type="button" class="btn-close btn-close-white" onclick="closeReminderModal()"></button>
+          </div>
+          <div class="modal-body">
+            <form action="{{ url_for('create_reminder') }}" method="post">
+              <div class="mb-3">
+                <label for="reminderDate" class="form-label">Data (YYYY-MM-DD)</label>
+                <input type="text" name="date" id="reminderDate" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label for="reminderText" class="form-label">Testo del Promemoria</label>
+                <textarea name="reminder_text" id="reminderText" class="form-control" rows="3" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Salva Promemoria</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal per inserire Rapporto di Lavoro -->
+    <div id="reportModal" class="modal" tabindex="-1" style="display: none;">
+      <div class="modal-dialog">
+        <div class="modal-content bg-dark text-light">
+          <div class="modal-header">
+            <h5 class="modal-title">Inserisci Rapporto di Lavoro</h5>
+            <button type="button" class="btn-close btn-close-white" onclick="closeReportModal()"></button>
+          </div>
+          <div class="modal-body">
+            <p>Per inserire il tuo rapporto, utilizza la funzione "Carica Foto". Tutti i rapportini verranno salvati ed saranno visibili all'admin.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Script per gestione pannello laterale, modali e nuove funzionalità -->
+  <script>
+    // Funzioni per gestire pannello laterale e modali
+    function toggleSidePanel() {
+      const panel = document.getElementById("sidePanel");
+      if (panel.style.left === "0px") {
+        panel.style.left = "-300px";
+      } else {
+        panel.style.left = "0px";
+      }
+    }
+    function openCreateReminder() {
+      toggleSidePanel();
+      document.getElementById("reminderModal").style.display = "block";
+    }
+    function closeReminderModal() {
+      document.getElementById("reminderModal").style.display = "none";
+    }
+    function openCreateReport() {
+      toggleSidePanel();
+      document.getElementById("reportModal").style.display = "block";
+    }
+    function closeReportModal() {
+      document.getElementById("reportModal").style.display = "none";
+    }
+    window.onclick = function(event) {
+      const reminderModal = document.getElementById("reminderModal");
+      const reportModal = document.getElementById("reportModal");
+      if (event.target == reminderModal) {
+        reminderModal.style.display = "none";
+      }
+      if (event.target == reportModal) {
+        reportModal.style.display = "none";
+      }
+    }
+    
+    // Pulse animation per il modello 3D
+    const mv = document.getElementById("robotModelViewer");
+    if(mv){
+      mv.addEventListener("click", function(){
+        mv.classList.add("pulse");
+        setTimeout(() => { mv.classList.remove("pulse"); }, 500);
+      });
+    }
+    
+    // Scroll automatico per tutte le chat-box
+    document.addEventListener("DOMContentLoaded", function() {
+      const chatBoxes = document.querySelectorAll(".chat-box");
+      chatBoxes.forEach(box => {
+        box.scrollTop = box.scrollHeight;
+      });
+    });
+    
+    // Funzione per attivare l'input vocale tramite la rotta /ascolta
+    function attivaVoce() {
+      fetch("/ascolta")
+        .then(response => response.json())
+        .then(data => {
+          if(data.risultato) {
+            // Inserisce il testo riconosciuto nel campo del messaggio
+            document.getElementById("messageInput").value = data.risultato;
+          } else {
+            alert("Nessun input vocale rilevato.");
+          }
+        })
+        .catch(error => {
+          console.error("Errore nell'input vocale:", error);
+          alert("Errore nell'input vocale.");
+        });
+    }
+    
+    // Polling per promemoria: ogni 60 secondi
+    function fetchReminders() {
+      fetch("/check_reminders")
+        .then(response => response.json())
+        .then(data => {
+          if (data.reminders && data.reminders.length > 0) {
+            data.reminders.forEach(reminder => {
+              alert("🕓 Promemoria: " + reminder.text + "\n⏰ " + reminder.dt);
+            });
+          }
+        })
+        .catch(error => console.error("Errore nel fetching dei promemoria:", error));
+    }
+    fetchReminders();
+    setInterval(fetchReminders, 60000);
+  </script>
+  
+  <!-- Bootstrap Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
